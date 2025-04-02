@@ -1,21 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
-  Request,
-  Post,
-  UseGuards,
-  HttpStatus,
-  Body,
   HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  LocalAuthGuard,
   AuthService,
   // JwtAuthGuard,
   BasicAuthGuard,
+  LocalAuthGuard,
 } from './auth';
-import { User } from './users';
 import { AppRequest } from './shared';
+import { UserEntity } from './users/entities/user.entity';
 
 @Controller()
 export class AppController {
@@ -32,8 +32,8 @@ export class AppController {
   @Post('api/auth/register')
   @HttpCode(HttpStatus.CREATED)
   // TODO ADD validation
-  register(@Body() body: User) {
-    return this.authService.register(body);
+  async register(@Body() body: UserEntity) {
+    return await this.authService.register(body);
   }
 
   @UseGuards(LocalAuthGuard)

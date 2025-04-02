@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { DB_CONNECTION_OPTIONS } from './db/db.connection';
 import { OrderModule } from './order/order.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OrderModule } from './order/order.module';
     AuthModule,
     CartModule,
     OrderModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [],

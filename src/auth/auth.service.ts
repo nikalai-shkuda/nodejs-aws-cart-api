@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/services/users.service';
-import { User } from '../users/models';
+import { UserEntity } from 'src/users/entities/user.entity';
 // import { contentSecurityPolicy } from 'helmet';
 type TokenResponse = {
   token_type: string;
@@ -15,28 +15,28 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  register(payload: User) {
-    const user = this.usersService.findOne(payload.name);
+  async register(payload: UserEntity) {
+    const user = await this.usersService.findOne(payload.name);
 
     if (user) {
       throw new BadRequestException('User with such name already exists');
     }
 
-    const { id: userId } = this.usersService.createOne(payload);
+    const { id: userId } = await this.usersService.createOne(payload);
     return { userId };
   }
 
-  validateUser(name: string, password: string): User {
-    const user = this.usersService.findOne(name);
+  async validateUser(name: string, password: string): Promise<UserEntity> {
+    const user = await this.usersService.findOne(name);
 
     if (user) {
       return user;
     }
 
-    return this.usersService.createOne({ name, password });
+    return await this.usersService.createOne({ name, password });
   }
 
-  login(user: User, type: 'jwt' | 'basic' | 'default'): TokenResponse {
+  login(user: UserEntity, type: 'jwt' | 'basic' | 'default'): TokenResponse {
     const LOGIN_MAP = {
       jwt: this.loginJWT,
       basic: this.loginBasic,
@@ -47,7 +47,7 @@ export class AuthService {
     return login ? login(user) : LOGIN_MAP.default(user);
   }
 
-  loginJWT(user: User) {
+  loginJWT(user: UserEntity) {
     const payload = { username: user.name, sub: user.id };
 
     return {
@@ -56,11 +56,11 @@ export class AuthService {
     };
   }
 
-  loginBasic(user: User) {
+  loginBasic(user: UserEntity) {
     // const payload = { username: user.name, sub: user.id };
     console.log(user);
 
-    function encodeUserToken(user: User) {
+    function encodeUserToken(user: UserEntity) {
       const { name, password } = user;
       const buf = Buffer.from([name, password].join(':'), 'utf8');
 
