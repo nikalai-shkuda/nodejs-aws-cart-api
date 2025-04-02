@@ -2,10 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { Cart, CartStatuses } from '../models';
 import { PutCartPayload } from 'src/order/type';
-
+import { Cart as CartEntity } from '../entities/cart.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 @Injectable()
 export class CartService {
+  constructor(
+    @InjectRepository(CartEntity)
+    private readonly cartRepository: Repository<CartEntity>,
+  ) {}
+
   private userCarts: Record<string, Cart> = {};
+
+  getAllCarts() {
+    return this.cartRepository.find({
+      relations: ['items'],
+    });
+  }
 
   findByUserId(userId: string): Cart {
     return this.userCarts[userId];

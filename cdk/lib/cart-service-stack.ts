@@ -3,19 +3,32 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
+import * as dotenv from 'dotenv';
 
 import path = require('path');
+
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 export class CartServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const nestLambda = new NodejsFunction(this, 'CartNestJsLambda', {
+    console.log('POSTGRES_DB', process.env.POSTGRES_DB);
+
+    const nestLambda = new NodejsFunction(this, 'NestJsLambda', {
       runtime: Runtime.NODEJS_22_X,
       handler: 'handler',
-      entry: path.join(__dirname, '../../src/lambda.ts'),
+      entry: path.join(__dirname, '../../dist/src/lambda.js'),
       timeout: cdk.Duration.seconds(30),
-      memorySize: 1024,
+      environment: {
+        NO_COLOR: '1',
+        NODE_ENV: process.env.NODE_ENV || 'development',
+        POSTGRES_DB: process.env.POSTGRES_DB!,
+        POSTGRES_HOST: process.env.POSTGRES_HOST!,
+        POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD!,
+        POSTGRES_PORT: process.env.POSTGRES_PORT!,
+        POSTGRES_USER: process.env.POSTGRES_USER!,
+      },
       bundling: {
         externalModules: [
           'class-transformer',
@@ -23,6 +36,7 @@ export class CartServiceStack extends cdk.Stack {
           '@nestjs/websockets',
           '@nestjs/microservices',
         ],
+        sourceMap: true,
       },
     });
 

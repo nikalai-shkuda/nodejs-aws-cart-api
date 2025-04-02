@@ -25,9 +25,21 @@ export class CartController {
     private orderService: OrderService,
   ) {}
 
+  @Get()
+  async getAllCartTemp(@Req() req: AppRequest) {
+    try {
+      console.log('getAllCartTemp request', req);
+      const carts = await this.cartService.getAllCarts();
+      console.log('getAllCartTemp carts', carts);
+      return carts;
+    } catch (error) {
+      console.error('Error in getAllCartTemp:', error);
+    }
+  }
+
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
-  @Get()
+  @Get('temp')
   findUserCart(@Req() req: AppRequest): CartItem[] {
     const cart = this.cartService.findOrCreateByUserId(
       getUserIdFromRequest(req),
