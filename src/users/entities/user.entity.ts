@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { CartEntity } from 'src/cart/entities/cart.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -13,4 +15,10 @@ export class UserEntity {
 
   @Column({ type: 'varchar' })
   password: string;
+
+  @OneToMany(() => CartEntity, (cart) => cart.user, { cascade: true })
+  carts?: CartEntity[];
+
+  @OneToMany(() => OrderEntity, (order) => order.user, { cascade: true })
+  orders?: OrderEntity[];
 }

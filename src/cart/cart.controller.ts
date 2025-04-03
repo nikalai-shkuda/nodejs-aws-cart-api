@@ -10,11 +10,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { OrderEntity } from 'src/order/entities/order.entity';
 import { CreateOrderDto, PutCartPayload } from 'src/order/type';
 import { BasicAuthGuard } from '../auth';
-import { Order, OrderService } from '../order';
+import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
-import { CartItem as CartItemEntity } from './entities/cart-item.entity';
+import { CartItemEntity } from './entities/cart-item.entity';
 import { CartService } from './services';
 
 @Controller('api/profile/cart')
@@ -69,29 +70,29 @@ export class CartController {
       throw new BadRequestException('Cart is empty');
     }
 
-    // TODO
-    // const { id: cartId, items } = cart;
-    // const total = calculateCartTotal(items);
-    // const order = this.orderService.create({
-    //   userId,
-    //   cartId,
-    //   items: items.map(({ product, count }) => ({
-    //     productId: product.id,
-    //     count,
-    //   })),
-    //   address: body.address,
-    //   total,
-    // });
-    // this.cartService.removeByUserId(userId);
+    const { id: cartId, items } = cart;
+    // const total = calculateCartTotal(items); TODO
+    const order = await this.orderService.create({
+      userId,
+      cartId,
+      items: items.map(({ product_id, count }) => ({
+        productId: product_id,
+        count,
+      })),
+      address: body.address,
+      // total,
+    });
 
-    // return {
-    //   order,
-    // };
+    this.cartService.removeByUserId(userId);
+
+    return {
+      order,
+    };
   }
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Order[] {
+  getOrder(): Promise<OrderEntity[]> {
     return this.orderService.getAll();
   }
 }

@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { CartStatuses } from '../cart';
-import { CartItem } from '../cart/entities/cart-item.entity';
-import { Cart } from '../cart/entities/cart.entity';
+import { CartItemEntity } from '../cart/entities/cart-item.entity';
+import { CartEntity } from '../cart/entities/cart.entity';
 import { DB_CONNECTION_OPTIONS } from './db.connection';
 
 console.log(111, DB_CONNECTION_OPTIONS);
@@ -51,7 +51,7 @@ async function seedDatabase() {
     await dataSource
       .createQueryBuilder()
       .insert()
-      .into(Cart)
+      .into(CartEntity)
       .values(carts)
       .execute();
 
@@ -60,7 +60,7 @@ async function seedDatabase() {
     await dataSource
       .createQueryBuilder()
       .insert()
-      .into(CartItem)
+      .into(CartItemEntity)
       .values(cartItems)
       .execute();
 

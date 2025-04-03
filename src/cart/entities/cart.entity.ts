@@ -2,15 +2,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CartStatuses } from '../models';
-import { CartItem } from './cart-item.entity';
+import { CartItemEntity } from './cart-item.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Entity('carts')
-export class Cart {
+export class CartEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -30,6 +34,15 @@ export class Cart {
   })
   status: CartStatuses;
 
-  @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })
-  items: CartItem[];
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart, {
+    cascade: true,
+  })
+  items: CartItemEntity[];
+
+  @OneToMany(() => OrderEntity, (order) => order.cart, { cascade: true })
+  orders: OrderEntity[];
+
+  @ManyToOne(() => UserEntity, (user) => user.carts, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity;
 }

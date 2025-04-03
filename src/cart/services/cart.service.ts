@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { Cart, CartStatuses } from '../models';
+import { CartStatuses } from '../models';
 import { PutCartPayload } from 'src/order/type';
-import { Cart as CartEntity } from '../entities/cart.entity';
-import { CartItem as CartItemEntity } from '../entities/cart-item.entity';
+import { CartEntity } from '../entities/cart.entity';
+import { CartItemEntity } from '../entities/cart-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 @Injectable()

@@ -1,9 +1,10 @@
 import path from 'path';
+import { CartItemEntity } from 'src/cart/entities/cart-item.entity';
+import { CartEntity } from 'src/cart/entities/cart.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { DataSourceOptions } from 'typeorm';
 import { dbConstants } from './config';
-import { Cart } from 'src/cart/entities/cart.entity';
-import { CartItem } from 'src/cart/entities/cart-item.entity';
-import { UserEntity } from 'src/users/entities/user.entity';
 
 export const DB_CONNECTION_OPTIONS: DataSourceOptions = {
   type: 'postgres',
@@ -12,7 +13,7 @@ export const DB_CONNECTION_OPTIONS: DataSourceOptions = {
   password: dbConstants.POSTGRES_PASSWORD,
   port: Number(dbConstants.POSTGRES_PORT),
   username: dbConstants.POSTGRES_USER,
-  entities: [Cart, CartItem, UserEntity],
+  entities: [CartEntity, CartItemEntity, OrderEntity, UserEntity],
   migrations: [path.join(__dirname, '/migrations/*.ts')],
   logging: true,
   synchronize: false,
