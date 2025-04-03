@@ -16,6 +16,7 @@ import { BasicAuthGuard } from '../auth';
 import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { CartItemEntity } from './entities/cart-item.entity';
+import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 
 @Controller('api/profile/cart')
@@ -71,7 +72,7 @@ export class CartController {
     }
 
     const { id: cartId, items } = cart;
-    // const total = calculateCartTotal(items); TODO
+    const total = calculateCartTotal(items);
     const order = await this.orderService.create({
       userId,
       cartId,
@@ -80,7 +81,7 @@ export class CartController {
         count,
       })),
       address: body.address,
-      // total,
+      total,
     });
 
     this.cartService.removeByUserId(userId);
