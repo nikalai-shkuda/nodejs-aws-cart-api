@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { OrderEntity } from '../entities/order.entity';
 import { CreateOrderPayload, OrderResponse } from '../type';
 
 @Injectable()
 export class OrderService {
   constructor(
+    private readonly dataSource: DataSource,
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
@@ -40,11 +41,13 @@ export class OrderService {
   }
 
   async create(data: CreateOrderPayload) {
-    const order = await this.orderRepository.create({
-      ...data,
-    });
+    return this.dataSource.transaction(async (manager) => {
+      const order = manager.create(OrderEntity, data);
 
-    return this.orderRepository.save(order);
+      await manager.save(order);
+
+      return order;
+    });
   }
 
   // TODO add  type
