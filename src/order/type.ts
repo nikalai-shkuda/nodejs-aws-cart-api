@@ -9,7 +9,7 @@ export enum OrderStatus {
 
 type StatusHistory = Array<{
   status: OrderStatus;
-  timestamp: number;
+  timestamp: number | Date;
   comment: string;
 }>;
 
@@ -34,9 +34,19 @@ export type PutCartPayload = {
   count: number;
 };
 export type CreateOrderPayload = {
-  userId: string;
-  cartId: string;
+  id?: string;
+  user_id: string;
+  cart_id: string;
+  address: Address;
+  total: number;
+  comments?: string;
+  payment?: {};
+  status?: OrderStatus;
+};
+
+export type OrderResponse = {
+  id: string;
   items: Array<{ productId: string; count: number }>;
   address: Address;
-  total?: number;
+  statusHistory: StatusHistory;
 };

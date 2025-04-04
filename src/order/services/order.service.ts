@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity } from '../entities/order.entity';
-import { CreateOrderPayload } from '../type';
+import { CreateOrderPayload, OrderResponse } from '../type';
 
 @Injectable()
 export class OrderService {
@@ -11,8 +11,28 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
-  async getAll(): Promise<OrderEntity[]> {
-    return this.orderRepository.find();
+  async getAll(): Promise<OrderResponse[]> {
+    const orders = await this.orderRepository.find({
+      relations: ['cart', 'cart.items'],
+    });
+
+    return orders.map((order) => ({
+      id: order.id,
+      address: order.address,
+      items: order?.cart?.items
+        ? order.cart.items.map((item) => ({
+            productId: item.product_id,
+            count: item.count,
+          }))
+        : [],
+      statusHistory: [
+        {
+          status: order.status,
+          timestamp: order.updated_at || null,
+          comment: order.comments || '',
+        },
+      ],
+    }));
   }
 
   async findById(orderId: string): Promise<OrderEntity> {
@@ -20,7 +40,7 @@ export class OrderService {
   }
 
   async create(data: CreateOrderPayload) {
-    const order = this.orderRepository.create({
+    const order = await this.orderRepository.create({
       ...data,
     });
 

@@ -1,12 +1,14 @@
 import { CartEntity } from 'src/cart/entities/cart.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { OrderStatus } from '../type';
+import { Address, OrderStatus } from '../type';
 import { UserEntity } from 'src/users/entities/user.entity';
 
 @Entity('orders')
@@ -20,20 +22,26 @@ export class OrderEntity {
   @Column({ type: 'uuid', nullable: false })
   cart_id: string;
 
-  @Column({ type: 'json', nullable: false, default: {} })
-  payment: {};
+  @Column({ type: 'json', nullable: true, default: {} })
+  payment?: {};
 
   @Column({ type: 'json', nullable: false, default: {} })
-  delivery: {};
+  address: Address;
 
   @Column({ type: 'text', nullable: true })
-  comments: string;
+  comments?: string;
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Open })
-  status: OrderStatus;
+  status?: OrderStatus;
 
   @Column({ type: 'integer' })
   total: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @ManyToOne(() => CartEntity, (cart) => cart.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cart_id' })

@@ -10,8 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { OrderEntity } from 'src/order/entities/order.entity';
-import { CreateOrderDto, PutCartPayload } from 'src/order/type';
+import { CreateOrderDto, OrderResponse, PutCartPayload } from 'src/order/type';
 import { BasicAuthGuard } from '../auth';
 import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
@@ -74,17 +73,13 @@ export class CartController {
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
     const order = await this.orderService.create({
-      userId,
-      cartId,
-      items: items.map(({ product_id, count }) => ({
-        productId: product_id,
-        count,
-      })),
+      user_id: userId,
+      cart_id: cartId,
       address: body.address,
       total,
     });
 
-    this.cartService.removeByUserId(userId);
+    // await this.cartService.removeByUserId(userId);
 
     return {
       order,
@@ -93,7 +88,7 @@ export class CartController {
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Promise<OrderEntity[]> {
+  getOrder(): Promise<OrderResponse[]> {
     return this.orderService.getAll();
   }
 }
