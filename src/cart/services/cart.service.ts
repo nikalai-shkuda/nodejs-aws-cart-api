@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { CartStatuses } from '../models';
-import { PutCartPayload } from 'src/order/type';
-import { CartEntity } from '../entities/cart.entity';
-import { CartItemEntity } from '../entities/cart-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'node:crypto';
+import { PutCartPayload } from 'src/order/type';
 import { Repository } from 'typeorm';
+import { CartItemEntity } from '../entities/cart-item.entity';
+import { CartEntity } from '../entities/cart.entity';
+import { ProductEntity } from '../entities/product.entity';
+import { CartStatuses, Product } from '../models';
 @Injectable()
 export class CartService {
   constructor(
@@ -13,12 +14,14 @@ export class CartService {
     private readonly cartRepository: Repository<CartEntity>,
     @InjectRepository(CartItemEntity)
     private readonly cartItemRepository: Repository<CartItemEntity>,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
   async findByUserId(userId: string): Promise<CartEntity> {
     return this.cartRepository.findOne({
       where: { user_id: userId },
-      relations: ['items'],
+      relations: ['items', 'items.product'],
     });
   }
 
@@ -58,9 +61,18 @@ export class CartService {
 
   async addOrUpdateCartItem(
     cartId: string,
-    productId: string,
+    productData: Product,
     count: number,
   ): Promise<void> {
+    let product = await this.productRepository.findOne({
+      where: { id: productData.id },
+    });
+
+    if (!product) {
+      product = this.productRepository.create(productData);
+      await this.productRepository.save(product);
+    }
+    const productId = product.id;
     const existingItem = await this.findExistingCartItem(cartId, productId);
 
     if (existingItem) {
@@ -94,7 +106,7 @@ export class CartService {
     if (payload.count > 0) {
       await this.addOrUpdateCartItem(
         userCart.id,
-        payload.product.id,
+        payload.product,
         payload.count,
       );
     } else if (payload.count === 0 && existingItem) {

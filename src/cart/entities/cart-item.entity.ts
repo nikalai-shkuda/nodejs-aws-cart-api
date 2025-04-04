@@ -11,6 +11,9 @@ import { ProductEntity } from './product.entity';
 @Entity('cart_items')
 export class CartItemEntity {
   @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'uuid', nullable: false })
   cart_id: string;
 
   @Column({ type: 'uuid', nullable: false })
