@@ -18,9 +18,12 @@ export class CartService {
     private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
-  async findByUserId(userId: string): Promise<CartEntity> {
+  async findByUserId(
+    userId: string,
+    status = CartStatuses.OPEN,
+  ): Promise<CartEntity> {
     return this.cartRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: userId, status },
       relations: ['items', 'items.product'],
     });
   }
@@ -122,5 +125,14 @@ export class CartService {
     if (userCart) {
       await this.cartRepository.delete(userCart.id);
     }
+  }
+
+  async updateCartStatus(cartId: string, status: CartStatuses) {
+    await this.cartRepository.update(
+      { id: cartId },
+      {
+        status,
+      },
+    );
   }
 }

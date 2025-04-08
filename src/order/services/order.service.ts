@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CartService } from 'src/cart/services';
 import { DataSource, Repository } from 'typeorm';
 import { OrderEntity } from '../entities/order.entity';
 import { CreateOrderPayload, OrderResponse } from '../type';
+import { CartStatuses } from 'src/cart/models';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly dataSource: DataSource,
+    private readonly cartService: CartService,
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
@@ -45,6 +48,11 @@ export class OrderService {
       const order = manager.create(OrderEntity, data);
 
       await manager.save(order);
+
+      await this.cartService.updateCartStatus(
+        order.cart_id,
+        CartStatuses.ORDERED,
+      );
 
       return order;
     });
