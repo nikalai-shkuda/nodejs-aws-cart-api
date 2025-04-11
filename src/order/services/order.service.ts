@@ -1,50 +1,67 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { Order } from '../models';
-import { CreateOrderPayload, OrderStatus } from '../type';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CartService } from 'src/cart/services';
+import { DataSource, Repository } from 'typeorm';
+import { OrderEntity } from '../entities/order.entity';
+import { CreateOrderPayload, OrderResponse } from '../type';
+import { CartStatuses } from 'src/cart/models';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly cartService: CartService,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepository: Repository<OrderEntity>,
+  ) {}
 
-  getAll() {
-    return Object.values(this.orders);
-  }
+  async getAll(): Promise<OrderResponse[]> {
+    const orders = await this.orderRepository.find({
+      relations: ['cart', 'cart.items'],
+    });
 
-  findById(orderId: string): Order {
-    return this.orders[orderId];
-  }
-
-  create(data: CreateOrderPayload) {
-    const id = randomUUID() as string;
-    const order: Order = {
-      id,
-      ...data,
+    return orders.map((order) => ({
+      id: order.id,
+      address: order.address,
+      items: order?.cart?.items
+        ? order.cart.items.map((item) => ({
+            productId: item.product_id,
+            count: item.count,
+          }))
+        : [],
       statusHistory: [
         {
-          comment: '',
-          status: OrderStatus.Open,
-          timestamp: Date.now(),
+          status: order.status,
+          timestamp: order.updated_at || null,
+          comment: order.comments || '',
         },
       ],
-    };
+    }));
+  }
 
-    this.orders[id] = order;
+  async findById(orderId: string): Promise<OrderEntity> {
+    return this.orderRepository.findOneBy({ id: orderId });
+  }
 
-    return order;
+  async create(data: CreateOrderPayload) {
+    return this.dataSource.transaction(async (manager) => {
+      const order = manager.create(OrderEntity, data);
+
+      await manager.save(order);
+
+      await this.cartService.updateCartStatus(
+        order.cart_id,
+        CartStatuses.ORDERED,
+      );
+
+      return order;
+    });
   }
 
   // TODO add  type
-  update(orderId: string, data: Order) {
-    const order = this.findById(orderId);
+  async update(orderId: string, data: OrderEntity) {
+    await this.orderRepository.update(orderId, data);
 
-    if (!order) {
-      throw new Error('Order does not exist.');
-    }
-
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
-    };
+    return this.findById(orderId);
   }
 }
