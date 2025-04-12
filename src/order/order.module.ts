@@ -6,7 +6,7 @@ import { OrderService } from './services';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([OrderEntity]),
+    // TypeOrmModule.forFeature([OrderEntity]),
     forwardRef(() => CartModule),
   ],
   providers: [OrderService],

@@ -38,7 +38,7 @@ export type CreateOrderPayload = {
   user_id: string;
   cart_id: string;
   address: Address;
-  total: number;
+  total?: number;
   comments?: string;
   payment?: {};
   status?: OrderStatus;
@@ -49,4 +49,16 @@ export type OrderResponse = {
   items: Array<{ productId: string; count: number }>;
   address: Address;
   statusHistory: StatusHistory;
+};
+export type Order = {
+  id?: string;
+  userId: string;
+  items: Array<{ productId: string; count: number }>;
+  cartId: string;
+  address: Address;
+  statusHistory: Array<{
+    status: OrderStatus.Open;
+    timestamp: number;
+    comment: string;
+  }>;
 };

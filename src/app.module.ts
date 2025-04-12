@@ -10,9 +10,9 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...DB_CONNECTION_OPTIONS,
-    }),
+    // TypeOrmModule.forRoot({
+    //   ...DB_CONNECTION_OPTIONS,
+    // }),
     ConfigModule.forRoot(),
     AuthModule,
     CartModule,

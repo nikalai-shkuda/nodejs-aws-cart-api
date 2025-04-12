@@ -10,7 +10,7 @@ import { CartService } from './services';
 @Module({
   imports: [
     OrderModule,
-    TypeOrmModule.forFeature([CartEntity, CartItemEntity, ProductEntity]),
+    // TypeOrmModule.forFeature([CartEntity, CartItemEntity, ProductEntity]),
   ],
   exports: [CartService],
   providers: [CartService],
